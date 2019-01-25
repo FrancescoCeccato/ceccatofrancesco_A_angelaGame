@@ -1,8 +1,11 @@
-bool turn = true;
-bool zero = true;
-int meta = 0;
-int current = 0;
-int previous;
+bool turn = true; //true = Player 1, false = Player 2
+bool zero = true; //Diviene "false" dopo il primo turno.
+int meta = 0; //La meta.
+int current = 0; //Il numero di punti attuale.
+int previous = -1; //Il turno precedente.
+
+int counterP1 = 0; //Numero di vittorie di P1 e P2.
+int counterP2 = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -11,8 +14,8 @@ void setup() {
 }
 
 void loop() {
-   setMeta();
-   while(current<meta){
+   setMeta(); //Impostazione della meta.
+   while(current<meta){ //Il gioco continua finchè la meta non è stata raggiunta o superata.
     execTurn();
    }
    gameOver();
@@ -26,11 +29,11 @@ int setMeta(){
 void getMeta(){
   int i;
   bool done = false;
-  while(!done){      
+  while(!done){ //Il metodo continuerà a chiedere il numero fintantoché questo non sarà accettabile.     
       Serial.println("- Si digiti un numero intero compreso fra 30 e 99!");
-      while (Serial.available() == 0);
-      Serial.println(String(i = Serial.parseInt()));
-      done = (i>=30 && i<100);
+      while (Serial.available() == 0);//Attendi la disponibilità di byte da leggere in console.
+      Serial.println(String(i = Serial.parseInt())); //Prende il numero, lo attribuisce ad i e poi lo stampa.
+      done = (i>=30 && i<100); //La definizione di "accettabile".
   }
   meta = i;
 }
@@ -43,22 +46,17 @@ void printMeta(){
 void execTurn(){
   int i;
   bool done = false;
-  Serial.println("- Turno di P"  + String(turn? "1" : "2") + " - Punti: " + counter());
+  Serial.println("- Turno di P"  + String(turn? "1" : "2") + " - Punti: " + scoreCompare());
   while(!done){  
     while (Serial.available() == 0);
     Serial.println(String(i = Serial.parseInt()));
     done = evaluateTurn(i);
   } 
-  previous = i;
-  current += i;
-  turn = !turn;
+  ready4NextTurn(i);
 }
 
-bool evaluateTurn(int i){
-  if(i==0 && zero){
-    return true;
-  }
-  else if(i>6 || i<0){
+bool evaluateTurn(int i){ //L'ultima condizione sottintende che 0 sarà valido al primo turno. Questo perché "zero" diviene false dopo il primo turno.
+  if(i>6 || i<0){
     Serial.println("- Inserisci un numero valido!");
     return false;
   }
@@ -66,21 +64,17 @@ bool evaluateTurn(int i){
     Serial.println("Non barare!");
     return false;
   }
-  else
-  {
-    zero = false;
-    return true;
-  }
+  else return true;
 }
 
-void gameOver()
-{
-  Serial.println("Il vincitore è " + String((turn == (current>meta)) ? "P1" : "P2") + "! " + counter());
+void gameOver(){
+  bool b = (turn == (current>meta));
+  Serial.println("- Il vincitore è " + String(b ? "P1" : "P2") + "! " + scoreCompare());
+  Serial.println(winCounter(b));
   resetValues();
-  Serial.println("Premi [Invia] per rigiocare!");
-  while (Serial.available() == 0);
+  aftermath();
 
-  /*La condizione "bool == bool" equivale all'operatore logico A XNOR B.
+  /*La condizione "boolA == boolB" equivale all'operatore logico A XNOR B.
    *TURN(A)|current>meta(B)| A XNOR B  | WINNER
    *TRUE   |     TRUE      |   TRUE    |   P1
    *TRUE   |     FALSE     |   FALSE   |   P2
@@ -93,15 +87,43 @@ void gameOver()
    */
 }
 
-void resetValues()
+void ready4NextTurn(int i)//Modifica i valori per il turno successivo.
 {
+  zero = false;
+  previous = i;
+  current += i;
+  turn = !turn;
+}
+
+void resetValues() {//Modifica i valori per la partita successiva.
   turn = true;
   zero = true;
   meta = 0;
   current = 0;
-  previous = 0;
+  previous = -1;
 }
 
-String counter(){
+void aftermath() {
+  bool done = false;
+  while(!done) {
+    Serial.println("- Inserisci un carattere e premi [Invia] per rigiocare!");
+    Serial.println("- Oppure inserisci 'x' per cancellare i punteggi.");
+    while (Serial.available() == 0);
+    String s = Serial.readString();
+    if(s=="x"){
+      counterP1 = counterP2 = 0;
+      Serial.println("- I punteggi sono stati cancellati.");
+    } else done = true;
+  }
+}
+
+String scoreCompare(){
   return String(current)+"/"+String(meta);
 }
+
+String winCounter(bool b)
+{
+  if(b) counterP1++; else counterP2++;
+  return "P1 :     " + String(counterP1) + " | " + String(counterP2) + "     : P2"; 
+}
+
