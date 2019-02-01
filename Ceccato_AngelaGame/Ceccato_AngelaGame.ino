@@ -9,8 +9,10 @@ int counterP2 = 0;
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("Benvenuti in Angela Game!");
+  Serial.println("==========Benvenuti in Angela Game!============");
   Serial.println("Un gioco di P.Perotto, porting by F.Ceccato");
+  Serial.println("Le istruzioni del gioco sono nel file 'AngelaReadme.txt' presente nella cartella del gioco.");
+  Serial.println("");
 }
 
 void loop() {
@@ -69,8 +71,11 @@ bool evaluateTurn(int i){ //L'ultima condizione sottintende che 0 sarà valido a
 
 void gameOver(){
   bool b = (turn == (current>meta));
+  Serial.println("");
   Serial.println("- Il vincitore è " + String(b ? "P1" : "P2") + "! " + scoreCompare());
+  Serial.println("");
   Serial.println(winCounter(b));
+  Serial.println("");
   resetValues();
   aftermath();
 
