@@ -1,3 +1,9 @@
+#include <LiquidCrystal.h>
+//#include "CarLibrary.h"
+
+const int rs = 12, en = 11, d4 = 5, d5 = 4 , d6 = 3, d7 = 2;
+LiquidCrystal lcd(rs,en,d4,d5,d6,d7);
+
 bool turn = true; //true = Player 1, false = Player 2
 bool zero = true; //Diviene "false" dopo il primo turno.
 int meta = 0; //La meta.
@@ -8,8 +14,9 @@ int counterP1 = 0; //Numero di vittorie di P1 e P2.
 int counterP2 = 0;
 
 void setup() {
-  Serial.begin(9600);
-  Serial.println("==========Benvenuti in Angela Game!============");
+  lcd.begin(16,2);
+
+  angelaIntro();
   Serial.println("Un gioco di P.Perotto, porting by F.Ceccato");
   Serial.println("Le istruzioni del gioco sono nel file 'AngelaReadme.txt' presente nella cartella del gioco.");
   Serial.println("");
@@ -71,11 +78,8 @@ bool evaluateTurn(int i){ //L'ultima condizione sottintende che 0 sarà valido a
 
 void gameOver(){
   bool b = (turn == (current>meta));
-  Serial.println("");
-  Serial.println("- Il vincitore è " + String(b ? "P1" : "P2") + "! " + scoreCompare());
-  Serial.println("");
-  Serial.println(winCounter(b));
-  Serial.println("");
+  Serial.println("\n- Il vincitore è " + String(b ? "P1" : "P2") + "! " + scoreCompare()+"\n");
+  Serial.println(winCounter(b)+"\n");
   resetValues();
   aftermath();
 
@@ -101,21 +105,18 @@ void ready4NextTurn(int i)//Modifica i valori per il turno successivo.
 }
 
 void resetValues() {//Modifica i valori per la partita successiva.
-  turn = true;
-  zero = true;
-  meta = 0;
-  current = 0;
+  turn = zero = true;
+  meta = current = 0;
   previous = -1;
 }
 
 void aftermath() {
   bool done = false;
   while(!done) {
-    Serial.println("- Inserisci un carattere e premi [Invia] per rigiocare!");
+    Serial.println("- Inserisci un carattere casuale e premi [Invia] per rigiocare!");
     Serial.println("- Oppure inserisci 'x' per cancellare i punteggi.");
     while (Serial.available() == 0);
-    String s = Serial.readString();
-    if(s=="x"){
+    if(Serial.readString()=="x"){
       counterP1 = counterP2 = 0;
       Serial.println("- I punteggi sono stati cancellati.");
     } else done = true;
@@ -128,7 +129,26 @@ String scoreCompare(){
 
 String winCounter(bool b)
 {
-  if(b) counterP1++; else counterP2++;
+  b? counterP1++ : counterP2++;
   return "P1 :     " + String(counterP1) + " | " + String(counterP2) + "     : P2"; 
 }
 
+
+void angelaIntro(){
+  String s1 = "ANGELA", s2 = " Game ";
+  int c1=-5, c2=15;
+
+  for(c1, c2; c1<6, c2>6; c1++, c2--)
+  {            
+    delay(60);
+    lcd.setCursor(c1-1,0); lcd.print(' ');
+    for(int i = c1; i<c1+6; i++)
+    {
+       lcd.setCursor(i,0); lcd.print(s1[i-c1]);
+      // lcd.setCursor(i,1); lcd.print(s2[i-c1]);
+    }
+  }
+  
+  
+  
+  }
