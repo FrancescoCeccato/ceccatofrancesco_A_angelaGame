@@ -1,5 +1,4 @@
 #include <LiquidCrystal.h>
-//#include "CarLibrary.h"
 
 const int rs = 12, en = 11, d4 = 5, d5 = 4 , d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs,en,d4,d5,d6,d7);
@@ -30,7 +29,7 @@ void loop() {
    gameOver();
 }
 
-int setMeta(){
+void setMeta(){
    getMeta();
    printMeta();
 }
@@ -38,11 +37,10 @@ int setMeta(){
 void getMeta(){
   int i;
   bool done = false;
-  while(!done){ //Il metodo continuerà a chiedere il numero fintantoché questo non sarà accettabile.     
+  while(i>=30 && i<100){ //Il metodo continuerà a chiedere il numero fintantoché questo non sarà accettabile.     
       Serial.println("- Si digiti un numero intero compreso fra 30 e 99!");
       while (Serial.available() == 0);//Attendi la disponibilità di byte da leggere in console.
-      Serial.println(String(i = Serial.parseInt())); //Prende il numero, lo attribuisce ad i e poi lo stampa.
-      done = (i>=30 && i<100); //La definizione di "accettabile".
+      Serial.println(i = Serial.parseInt()); //Prende il numero, lo attribuisce ad i e poi lo stampa.
   }
   meta = i;
 }
@@ -136,19 +134,31 @@ String winCounter(bool b)
 
 void angelaIntro(){
   String s1 = "ANGELA", s2 = " Game ";
-  int c1=-5, c2=15;
 
-  for(c1, c2; c1<6, c2>6; c1++, c2--)
+  for(int c1 = -5, c2 = 15; c1<6; c1++,c2--)
   {            
     delay(60);
     lcd.setCursor(c1-1,0); lcd.print(' ');
-    for(int i = c1; i<c1+6; i++)
+    for(int i1=c1, i2=c2; i1<c1+6; i1++,i2++)
     {
-       lcd.setCursor(i,0); lcd.print(s1[i-c1]);
-      // lcd.setCursor(i,1); lcd.print(s2[i-c1]);
+       lcd.setCursor(i1,0); lcd.print(s1[i1-c1]);
+       lcd.setCursor(i2,1); lcd.print(s2[i2-c2]);
     }
   }
-  
-  
-  
+  delay(100);
+  for(int i1=5, i2=10; i1>=0; i1--,i2++)
+  {
+     char c = i1 == 0 ? '|' : '.';
+     lcd.setCursor(i1,1); lcd.print(c);
+     lcd.setCursor(i2,1); lcd.print(c);
+     if(i1!=5)
+     {
+      lcd.setCursor(i1,0); lcd.print(c);
+      lcd.setCursor(i2,0); lcd.print(c);
+     }
+      delay(50);
   }
+}
+  
+ 
+ 
