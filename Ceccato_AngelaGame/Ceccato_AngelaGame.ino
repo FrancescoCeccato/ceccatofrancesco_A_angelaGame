@@ -1,49 +1,57 @@
 #include <LiquidCrystal.h>
+#define DELAYINTRO 50
+#define DELAYNEXTFUNC 500
+#define B1 12
+#define B2 11
+#define B3 10
 
-const int rs = 12, en = 11, d4 = 5, d5 = 4 , d6 = 3, d7 = 2;
+const int rs = 9, en = 8, d4 = 5, d5 = 4 , d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs,en,d4,d5,d6,d7);
 
-bool turn = true; //true = Player 1, false = Player 2
-bool zero = true; //Diviene "false" dopo il primo turno.
-int meta = 0; //La meta.
-int current = 0; //Il numero di punti attuale.
-int previous = -1; //Il turno precedente.
+bool turn;
+bool zero;
+int meta;
+int current;
+int previous;
 
 int counterP1 = 0; //Numero di vittorie di P1 e P2.
 int counterP2 = 0;
+bool firstGame = true;
 
 void setup() {
-  lcd.begin(16,2);
-
-  angelaIntro();
-  Serial.println("Un gioco di P.Perotto, porting by F.Ceccato");
-  Serial.println("Le istruzioni del gioco sono nel file 'AngelaReadme.txt' presente nella cartella del gioco.");
-  Serial.println("");
+  turn = true; //true = Player 1, false = Player 2
+  zero = true; //Diviene "false" dopo il primo turno.
+  meta = 0; //La meta.
+  current = 0; //Il numero di punti attuale.
+  previous = -1; //Il turno precedente.
+  
+  if(firstGame){
+    lcd.begin(16,2);
+    pinMode(B1, INPUT_PULLUP);
+    pinMode(B2, INPUT_PULLUP);
+    pinMode(B3, INPUT_PULLUP);
+    
+    arduino_Intro();
+    firstGame = false;
+  }
 }
 
 void loop() {
-   setMeta(); //Impostazione della meta.
+//   set_Meta(); //Impostazione della meta.
    while(current<meta){ //Il gioco continua finchè la meta non è stata raggiunta o superata.
     execTurn();
    }
    gameOver();
 }
 
-void setMeta(){
-   getMeta();
-   printMeta();
-}
-
-void getMeta(){
+/*void getMeta(){
   int i;
-  bool done = false;
   while(i>=30 && i<100){ //Il metodo continuerà a chiedere il numero fintantoché questo non sarà accettabile.     
-      Serial.println("- Si digiti un numero intero compreso fra 30 e 99!");
-      while (Serial.available() == 0);//Attendi la disponibilità di byte da leggere in console.
-      Serial.println(i = Serial.parseInt()); //Prende il numero, lo attribuisce ad i e poi lo stampa.
+      Arduino_Display_Meta();
+      i = Arduino_SetMeta; //Prende il numero, lo attribuisce ad i e poi lo stampa.
   }
   meta = i;
-}
+}*/
 
 void printMeta(){
    String s = "- La meta scelta ammonta a " + String(meta); 
@@ -131,22 +139,26 @@ String winCounter(bool b)
   return "P1 :     " + String(counterP1) + " | " + String(counterP2) + "     : P2"; 
 }
 
-
-void angelaIntro(){
+void arduino_Intro(){
   String s1 = "ANGELA", s2 = " Game ";
-
-  for(int c1 = -5, c2 = 15; c1<6; c1++,c2--)
-  {            
-    delay(60);
+  
+  int c1 = -5, c2 = 15; 
+  while(c1<6)
+  {
     lcd.setCursor(c1-1,0); lcd.print(' ');
-    for(int i1=c1, i2=c2; i1<c1+6; i1++,i2++)
+    int i1 = c1, i2 = c2;
+    while(i1<c1+6)
     {
        lcd.setCursor(i1,0); lcd.print(s1[i1-c1]);
        lcd.setCursor(i2,1); lcd.print(s2[i2-c2]);
+       i1++; i2++;
     }
+    delay(DELAYINTRO);  
+    c1++; c2--;
   }
-  delay(100);
-  for(int i1=5, i2=10; i1>=0; i1--,i2++)
+
+  int i1=5, i2=10;
+  while(i1>=0)
   {
      char c = i1 == 0 ? '|' : '.';
      lcd.setCursor(i1,1); lcd.print(c);
@@ -156,9 +168,26 @@ void angelaIntro(){
       lcd.setCursor(i1,0); lcd.print(c);
       lcd.setCursor(i2,0); lcd.print(c);
      }
-      delay(50);
+     delay(DELAYINTRO);
+     i1--; 
+     i2++;
   }
+ 
+  delay(DELAYNEXTFUNC); 
+  lcd.clear();
 }
+
+void arduino_MetaState(){
+  lcd.setCursor(0,1); lcd.print("[-]");
+  lcd.setCursor(6,1); lcd.print("[OK]");
+  lcd.setCursor(13,1); lcd.print("[+]");
+
+  lcd.setCursor(4,0); lcd.print("Meta:");
+  //while(digitalRead(
+}
+
+  
+
   
  
  
