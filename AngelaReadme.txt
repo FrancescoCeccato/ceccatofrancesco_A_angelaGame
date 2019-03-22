@@ -1,5 +1,4 @@
 ANGELA GAME by Piergiorgio Perotto
-per console seriale di Arduino IDE - 9600 baud
 
 Giocatori: 2
 Età: 5+
